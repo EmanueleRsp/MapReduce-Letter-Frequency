@@ -26,6 +26,7 @@
         <archive>
           <manifest>
             <addClasspath>true</addClasspath>
+            <mainClass>it.unipi.hadoop.WorkFlow</mainClass>
           </manifest>
         </archive>
       </configuration>

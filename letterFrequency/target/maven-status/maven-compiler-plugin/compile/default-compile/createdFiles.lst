@@ -1,3 +1,4 @@
+it/unipi/hadoop/WorkFlow.class
 it/unipi/hadoop/LetterCount$CounterMapper.class
 it/unipi/hadoop/LetterCount.class
 it/unipi/hadoop/LetterFrequency$FrequencyReducer.class
