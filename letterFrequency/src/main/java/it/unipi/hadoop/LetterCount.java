@@ -71,7 +71,7 @@ public class LetterCount
     }
 
     // Configure the job
-    public static Job configureLetterCountJob(Configuration conf, Map<String, String> argMap, int numReducerTasks) throws IOException {
+    public static Job configureJob(Configuration conf, Map<String, String> argMap, int numReducerTasks) throws IOException {
         Job letterCountJob = Job.getInstance(conf, "Letter Count");
     
         // Set the main classes

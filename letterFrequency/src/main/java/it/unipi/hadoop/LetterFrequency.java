@@ -91,7 +91,7 @@ public class LetterFrequency
         }
     }
 
-    public static Job configureLetterFrequencyJob(Configuration conf, Map<String, String> argMap, int textLength, int numReducerTasks) throws IOException {
+    public static Job configureJob(Configuration conf, Map<String, String> argMap, int textLength, int numReducerTasks) throws IOException {
         Job letterFrequencyJob = Job.getInstance(conf, "LetterFrequency");
     
         // Set the configuration

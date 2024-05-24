@@ -51,7 +51,7 @@ public class WorkFlow {
         FSDataInputStream inputStream = fs.open(outputPath);
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
-        // Assume the number you need is on the first line of the output
+        // The result is on the first line of the output
         String firstLine = bufferedReader.readLine();
         int textLength = Integer.parseInt(firstLine);
 
@@ -75,7 +75,7 @@ public class WorkFlow {
         Map<String, String> argMap = parseArguments(args);
 
         // Create a letter count job
-        Job letterCountJob = LetterCount.configureLetterCountJob(conf, argMap, DEFAULT_NUM_REDUCERS);
+        Job letterCountJob = LetterCount.configureJob(conf, argMap, DEFAULT_NUM_REDUCERS);
         // Wait for the first job to complete
         if (!letterCountJob.waitForCompletion(true)) {
             System.exit(1);
@@ -85,7 +85,7 @@ public class WorkFlow {
         int textLength = readTextLength(conf, argMap.get("letterCountOutput"));
         
         // Create a letter frequency job
-        Job letterFrequencyJob = LetterFrequency.configureLetterFrequencyJob(conf, argMap, textLength, DEFAULT_NUM_REDUCERS);
+        Job letterFrequencyJob = LetterFrequency.configureJob(conf, argMap, textLength, DEFAULT_NUM_REDUCERS);
         // Wait for the second job to complete
         System.exit(letterFrequencyJob.waitForCompletion(true) ? 0 : 1);
 
