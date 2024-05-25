@@ -2,25 +2,21 @@
 
 set -e
 
+# Settings
+project_name=$1
+num_reducers=$2
+save_logs=$3
+download_output=$4
+
 # Local project directory
 parent_dir=$(dirname $(pwd))
 
-# Compile the Java code
-cd ${parent_dir}/letterFrequency
-mvn clean package
-
-# Check if the Hadoop cluster is running
-if ! hdfs dfs -test -d /; then
-    echo "Hadoop cluster is not running"
-    exit 1
-fi
-
 # Upload the JAR file to the Hadoop cluster
-cd ${parent_dir}/letterFrequency
-scp target/letterFrequency-1.0-SNAPSHOT.jar  hadoop@10.1.1.77:
+cd ${parent_dir}/${project_name}
+scp target/${project_name}-1.0-SNAPSHOT.jar  hadoop@10.1.1.77:
 
 # Create a directory in HDFS to store the project files
-project_dir=/user/$(whoami)/letterFrequency
+project_dir=/user/$(whoami)/${project_name}
 hdfs dfs -mkdir -p ${project_dir}
 printf "HDFS Project directory %s\n" ${project_dir}
 
@@ -64,14 +60,33 @@ for file in resources/input/*; do
     # Get the filename
     filename=$(basename $file .txt)
 
-    # Execute the Hadoop WorkFlow
-    cd ${parent_dir}/letterFrequency
-    hadoop jar target/letterFrequency-1.0-SNAPSHOT.jar \
-    it.unipi.hadoop.WorkFlow \
-    input=${input_dir}/${filename}.txt \
-    letterCountOutput=${output_dir}/output_${formatted_number}/${filename}/count \
-    letterFrequencyOutput=${output_dir}/output_${formatted_number}/${filename}/frequency
+    if [ "$save_logs" = true ]; then
+        cd ${parent_dir}
+        mkdir -p resources/output/output_${formatted_number}/${filename}
+        log_file=resources/output/output_${formatted_number}/${filename}/log.txt
 
+        # Execute the Hadoop WorkFlow
+        cd ${parent_dir}/${project_name}
+        hadoop jar target/${project_name}-1.0-SNAPSHOT.jar \
+        it.unipi.hadoop.WorkFlow \
+        input=${input_dir}/${filename}.txt \
+        letterCountOutput=${output_dir}/output_${formatted_number}/${filename}/count \
+        letterFrequencyOutput=${output_dir}/output_${formatted_number}/${filename}/frequency \
+        numReducers=${num_reducers} \
+        > ../${log_file} 2>&1
+    else
+        # Execute the Hadoop WorkFlow
+        cd ${parent_dir}/${project_name}
+        hadoop jar target/${project_name}-1.0-SNAPSHOT.jar \
+        it.unipi.hadoop.WorkFlow \
+        input=${input_dir}/${filename}.txt \
+        letterCountOutput=${output_dir}/output_${formatted_number}/${filename}/count \
+        letterFrequencyOutput=${output_dir}/output_${formatted_number}/${filename}/frequency \
+        numReducers=${num_reducers}
+    fi
+
+    printf "Hadoop WorkFlow executed for %s\n" ${filename}
+    
 done
 
 
@@ -81,22 +96,30 @@ echo $((run_number + 1)) > run_number.txt
 
 
 # Download the output files from HDFS
-cd ${parent_dir}
-for file in resources/input/*; do
-    # Get the filename
-    filename=$(basename $file .txt)
-    
-    mkdir -p resources/output/output_${formatted_number}/${filename}/count
-    hdfs dfs -get ${output_dir}/output_${formatted_number}/${filename}/count/part-r-00000 \
-    resources/output/output_${formatted_number}/${filename}/count
-    mkdir -p resources/output/output_${formatted_number}/${filename}/frequency
-    hdfs dfs -get ${output_dir}/output_${formatted_number}/${filename}/frequency/part-r-00000 \
-    resources/output/output_${formatted_number}/${filename}/frequency
-    printf "Output files downloaded\n"
+if [ "$download_output" = true ]; then
+    cd ${parent_dir}
+    for file in resources/input/*; do
+        # Get the filename
+        filename=$(basename $file .txt)
+        
+        mkdir -p resources/output/output_${formatted_number}/${filename}/count
+        hdfs dfs -get ${output_dir}/output_${formatted_number}/${filename}/count/part-r-00000 \
+        resources/output/output_${formatted_number}/${filename}/count
+        mkdir -p resources/output/output_${formatted_number}/${filename}/frequency
+        hdfs dfs -get ${output_dir}/output_${formatted_number}/${filename}/frequency/part-r-00000 \
+        resources/output/output_${formatted_number}/${filename}/frequency
+        printf "Output files downloaded\n"
 
-    # Print the output file
-    printf "Text length: "
-    cat resources/output/output_${formatted_number}/${filename}/count/part-r-00000
-    printf "Letter frequency:\n"
-    cat resources/output/output_${formatted_number}/${filename}/frequency/part-r-00000
-done
+        # Print the output file
+        printf "Text length: "
+        cat resources/output/output_${formatted_number}/${filename}/count/part-r-00000
+        printf "Letter frequency:\n"
+        cat resources/output/output_${formatted_number}/${filename}/frequency/part-r-00000
+    done
+fi
+
+
+# Add file text to specify parameters used
+cd ${parent_dir}
+filename=$(basename $file .txt)
+echo "Parameters: WorkFlow = ${project_name} Num_reducers = $num_reducers" >> resources/output/output_${formatted_number}/parameters.txt
