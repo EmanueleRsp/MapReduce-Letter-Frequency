@@ -5,8 +5,17 @@ set -e
 # Settings
 project_name=$1
 num_reducers=$2
-save_logs=$3
-download_output=$4
+performance=$3
+
+if [ "$performance" = true ]; then
+    save_logs=true
+    download_output=true
+    source_file_dir=performance
+else
+    save_logs=false
+    download_output=true
+    source_file_dir=normal
+fi
 
 # Local project directory
 parent_dir=$(dirname $(pwd))
@@ -63,13 +72,13 @@ for file in resources/input/*; do
     if [ "$save_logs" = true ]; then
         cd ${parent_dir}
         mkdir -p resources/output/output_${formatted_number}/${filename}
-        log_file=resources/output/output_${formatted_number}/${filename}/log.txt
+        log_file=resources/output/${source_file_dir}/output_${formatted_number}/${filename}/log.txt
 
         # Execute the Hadoop WorkFlow
         cd ${parent_dir}/${project_name}
         hadoop jar target/${project_name}-1.0-SNAPSHOT.jar \
         it.unipi.hadoop.WorkFlow \
-        input=${input_dir}/${filename}.txt \
+        input=${input_dir}/${source_file_dir}/${filename}.txt \
         letterCountOutput=${output_dir}/output_${formatted_number}/${filename}/count \
         letterFrequencyOutput=${output_dir}/output_${formatted_number}/${filename}/frequency \
         numReducers=${num_reducers} \
@@ -99,7 +108,7 @@ if [ "$download_output" = true ]; then
         filename=$(basename $file .txt)
 
         # local directory for output files
-        local_dir=resources/output/output_${formatted_number}/${filename}
+        local_dir=resources/output/${source_file_dir}/output_${formatted_number}/${filename}
         mkdir -p $local_dir
         
         # output files
@@ -122,7 +131,7 @@ if [ "$download_output" = true ]; then
 
         # Print the output file
         printf "Text length: "
-        cat resources/output/output_${formatted_number}/${filename}/count.txt
+        cat $count_output_file
         
     done
 fi

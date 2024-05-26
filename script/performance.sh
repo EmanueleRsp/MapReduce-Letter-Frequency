@@ -15,11 +15,7 @@ project_names=("letterFrequencyCombiner" "letterFrequencyInMapping")
 # Array of num_reducers
 num_reducers_values=(1 2 3)
 
-# Array of save_logs values
-save_logs_values=(true)
-
-# Array of download_output values
-download_output_values=(true)
+performance=true
 
 # Iterate over each combination of values
 for project_name in ${project_names[@]}; do
@@ -29,12 +25,10 @@ for project_name in ${project_names[@]}; do
     mvn clean package
 
     for num_reducers in ${num_reducers_values[@]}; do
-        for save_logs in ${save_logs_values[@]}; do
-            for download_output in ${download_output_values[@]}; do
-                cd ${parent_dir}/script
-                printf "Executing %s with %d reducers, save_logs=%s, download_output=%s\n" $project_name $num_reducers $save_logs $download_output
-                ./run.sh $project_name $num_reducers $save_logs $download_output
-            done
-        done
+        cd ${parent_dir}/script
+        printf "Executing %s with %d reducers, performance=%s\n" $project_name $num_reducers $performance
+        ./run.sh $project_name $num_reducers $performance
     done
 done
+
+printf "All combinations executed\n"
