@@ -7,7 +7,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Job;
 
@@ -46,23 +48,39 @@ public class WorkFlow {
     public static int readTextLength(Configuration conf, String outputDirectory) throws IOException {
         // Read the output of the first job
         FileSystem fs = FileSystem.get(conf);
-        String filePath = outputDirectory + "/part-r-00000";
-        org.apache.hadoop.fs.Path outputPath = new org.apache.hadoop.fs.Path(filePath);
-        FSDataInputStream inputStream = fs.open(outputPath);
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        Path outputDirPath = new org.apache.hadoop.fs.Path(outputDirectory);
 
-        // The result is on the first line of the output
-        String firstLine = bufferedReader.readLine();
-        int textLength = Integer.parseInt(firstLine);
+        // Initialize the total text length
+        int totalTextLength = 0;
 
-        // Close the input stream
-        bufferedReader.close();
-        inputStream.close();
+        // Get a list of all files in the output directory
+        FileStatus[] status = fs.listStatus(outputDirPath);
+        for (FileStatus fileStatus : status) {
+            String fileName = fileStatus.getPath().getName();
 
-        // Display the text length
-        System.out.println("Letter Count - Text length: " + textLength);
+            // Ignore the _SUCCESS file
+            if (!fileName.equals("_SUCCESS")) {
+                // Open the file
+                FSDataInputStream inputStream = fs.open(fileStatus.getPath());
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
-        return textLength;
+                // The result is on the first line of the output
+                String firstLine = bufferedReader.readLine();
+                if(firstLine != null) {
+                    int textLength = Integer.parseInt(firstLine);
+                    totalTextLength += textLength;
+                }
+
+                // Close the input stream
+                bufferedReader.close();
+                inputStream.close();
+            }
+        }
+
+        // Display the total text length
+        System.out.println("Letter Count - Total text length: " + totalTextLength);
+
+        return totalTextLength;
     }
     
     public static void main(String[] args) throws Exception

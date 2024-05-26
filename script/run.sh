@@ -90,36 +90,50 @@ for file in resources/input/*; do
 done
 
 
+# Download the output files from HDFS
+if [ "$download_output" = true ]; then
+    cd ${parent_dir}
+    for file in resources/input/*; do
+
+        # Get the filename
+        filename=$(basename $file .txt)
+
+        # local directory for output files
+        local_dir=resources/output/output_${formatted_number}/${filename}
+        mkdir -p $local_dir
+        
+        # output files
+        count_output_file=${local_dir}/count.txt
+        > $count_output_file
+        frequency_output_file=${local_dir}/frequency.txt
+        > $frequency_output_file
+
+        count_output_files=$(hadoop fs -ls ${output_dir}/output_${formatted_number}/${filename}/count | grep -v '_SUCCESS' | awk '{print $8}')
+        for file in $count_output_files; do
+            hadoop fs -text $file >> $count_output_file
+        done
+
+        frequency_output_files=$(hadoop fs -ls ${output_dir}/output_${formatted_number}/${filename}/frequency | grep -v '_SUCCESS' | awk '{print $8}')
+        for file in $frequency_output_files; do
+            hadoop fs -text $file >> $frequency_output_file
+        done
+
+        printf "Output files downloaded\n"
+
+        # Print the output file
+        printf "Text length: "
+        cat resources/output/output_${formatted_number}/${filename}/count.txt
+        
+    done
+fi
+
+
 # Increment the run number and save it to the file
 cd ${parent_dir}/script
 echo $((run_number + 1)) > run_number.txt
 
 
-# Download the output files from HDFS
-if [ "$download_output" = true ]; then
-    cd ${parent_dir}
-    for file in resources/input/*; do
-        # Get the filename
-        filename=$(basename $file .txt)
-        
-        mkdir -p resources/output/output_${formatted_number}/${filename}/count
-        hdfs dfs -get ${output_dir}/output_${formatted_number}/${filename}/count/part-r-00000 \
-        resources/output/output_${formatted_number}/${filename}/count
-        mkdir -p resources/output/output_${formatted_number}/${filename}/frequency
-        hdfs dfs -get ${output_dir}/output_${formatted_number}/${filename}/frequency/part-r-00000 \
-        resources/output/output_${formatted_number}/${filename}/frequency
-        printf "Output files downloaded\n"
-
-        # Print the output file
-        printf "Text length: "
-        cat resources/output/output_${formatted_number}/${filename}/count/part-r-00000
-        printf "Letter frequency:\n"
-        cat resources/output/output_${formatted_number}/${filename}/frequency/part-r-00000
-    done
-fi
-
-
 # Add file text to specify parameters used
 cd ${parent_dir}
 filename=$(basename $file .txt)
-echo "Parameters: WorkFlow = ${project_name} Num_reducers = $num_reducers" >> resources/output/output_${formatted_number}/parameters.txt
+echo "Parameters: WorkFlow=${project_name} Num_reducers=$num_reducers" >> resources/output/output_${formatted_number}/parameters.txt

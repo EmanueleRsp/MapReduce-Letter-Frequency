@@ -11,6 +11,7 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.Partitioner;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
@@ -63,6 +64,13 @@ public class LetterCount
 
     }
 
+    public static class CounterPartitioner extends Partitioner<NullWritable, IntWritable> {
+        @Override
+        public int getPartition(NullWritable key, IntWritable value, int numReduceTasks) {
+            return (int)(Math.random() * numReduceTasks);
+        }
+    }
+
     public static class CounterReducer extends Reducer<NullWritable, IntWritable, NullWritable, IntWritable>
     {
         // Variables
@@ -92,6 +100,9 @@ public class LetterCount
         letterCountJob.setJarByClass(LetterCount.class);
         letterCountJob.setMapperClass(CounterMapper.class);
         letterCountJob.setReducerClass(CounterReducer.class);
+
+        // Set the partitioner
+        letterCountJob.setPartitionerClass(CounterPartitioner.class);
     
         // Set number of reducers 
         if (argMap.containsKey("numReducers")) {

@@ -4,5 +4,6 @@ it/unipi/hadoop/LetterCount$CounterMapper.class
 it/unipi/hadoop/LetterCount.class
 it/unipi/hadoop/LetterFrequency$FrequencyReducer.class
 it/unipi/hadoop/LetterFrequency$FrequencyMapper.class
+it/unipi/hadoop/LetterCount$CounterPartitioner.class
 it/unipi/hadoop/LetterFrequency.class
 it/unipi/hadoop/LetterCount$CounterReducer.class
