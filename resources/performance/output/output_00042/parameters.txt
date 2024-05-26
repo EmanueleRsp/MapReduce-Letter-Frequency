@@ -1,0 +1,1 @@
+Parameters: WorkFlow=letterFrequencyCombiner Num_reducers=3

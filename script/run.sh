@@ -10,11 +10,11 @@ performance=$3
 if [ "$performance" = true ]; then
     save_logs=true
     download_output=true
-    source_file_dir=performance
+    resource_dir=resources/performance
 else
     save_logs=false
     download_output=true
-    source_file_dir=normal
+    resource_dir=resources/normal
 fi
 
 # Local project directory
@@ -42,7 +42,7 @@ printf "HDFS Output directory %s\n" ${output_dir}
 
 # Upload each input file to HDFS if it does not exist
 cd ${parent_dir}
-for file in resources/input/*; do
+for file in ${resource_dir}/input/*; do
     filename=$(basename $file)
     if ! hdfs dfs -test -e ${input_dir}/${filename}; then
         hdfs dfs -put $file ${input_dir}
@@ -65,20 +65,20 @@ printf "Execution number %s\n" $formatted_number
 
 # Execute Hadoop WorkFlow for each input
 cd ${parent_dir}
-for file in resources/input/*; do
+for file in ${resource_dir}/input/*; do
     # Get the filename
     filename=$(basename $file .txt)
 
     if [ "$save_logs" = true ]; then
         cd ${parent_dir}
-        mkdir -p resources/output/output_${formatted_number}/${filename}
-        log_file=resources/output/${source_file_dir}/output_${formatted_number}/${filename}/log.txt
+        mkdir -p ${resource_dir}/output/output_${formatted_number}/${filename}
+        log_file=${resource_dir}/output/output_${formatted_number}/${filename}/log.txt
 
         # Execute the Hadoop WorkFlow
         cd ${parent_dir}/${project_name}
         hadoop jar target/${project_name}-1.0-SNAPSHOT.jar \
         it.unipi.hadoop.WorkFlow \
-        input=${input_dir}/${source_file_dir}/${filename}.txt \
+        input=${input_dir}/${filename}.txt \
         letterCountOutput=${output_dir}/output_${formatted_number}/${filename}/count \
         letterFrequencyOutput=${output_dir}/output_${formatted_number}/${filename}/frequency \
         numReducers=${num_reducers} \
@@ -102,13 +102,13 @@ done
 # Download the output files from HDFS
 if [ "$download_output" = true ]; then
     cd ${parent_dir}
-    for file in resources/input/*; do
+    for file in ${resource_dir}/input/*; do
 
         # Get the filename
         filename=$(basename $file .txt)
 
         # local directory for output files
-        local_dir=resources/output/${source_file_dir}/output_${formatted_number}/${filename}
+        local_dir=${resource_dir}/output/output_${formatted_number}/${filename}
         mkdir -p $local_dir
         
         # output files
@@ -145,4 +145,4 @@ echo $((run_number + 1)) > run_number.txt
 # Add file text to specify parameters used
 cd ${parent_dir}
 filename=$(basename $file .txt)
-echo "Parameters: WorkFlow=${project_name} Num_reducers=$num_reducers" >> resources/output/output_${formatted_number}/parameters.txt
+echo "Parameters: WorkFlow=${project_name} Num_reducers=$num_reducers" >> ${resource_dir}/output/output_${formatted_number}/parameters.txt
