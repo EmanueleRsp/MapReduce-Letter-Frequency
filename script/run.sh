@@ -22,7 +22,7 @@ parent_dir=$(dirname $(pwd))
 
 # Upload the JAR file to the Hadoop cluster
 cd ${parent_dir}/${project_name}
-scp target/${project_name}-1.0-SNAPSHOT.jar  hadoop@10.1.1.77:
+scp target/${project_name}-1.0-SNAPSHOT.jar  hadoop@10.1.1.85:
 
 # Create a directory in HDFS to store the project files
 project_dir=/user/$(whoami)/${project_name}
@@ -69,6 +69,10 @@ for file in ${resource_dir}/input/*; do
     # Get the filename
     filename=$(basename $file .txt)
 
+    # Start the timer
+    start_time=$(date +%s)
+
+
     if [ "$save_logs" = true ]; then
         cd ${parent_dir}
         mkdir -p ${resource_dir}/output/output_${formatted_number}/${filename}
@@ -94,8 +98,24 @@ for file in ${resource_dir}/input/*; do
         numReducers=${num_reducers}
     fi
 
+    if [ "$save_logs" = true ]; then
+        # Stop the timer and calculate the execution time
+        end_time=$(date +%s)
+        execution_time=$((end_time - start_time))
+
+        # Define the output CSV file path
+        csv_output_file="${parent_dir}/${resource_dir}/performance_csv/${filename}_${project_name}_results.csv"
+        
+        # Check if the file exists. If not, create it and add the header
+        if [ ! -f $csv_output_file ]; then
+            echo "Project,NumReducers,Performance,ExecutionTime" > $csv_output_file
+        fi
+
+        # Write the performance results to the CSV file
+        printf "%s,%d,%s,%d\n" $project_name $num_reducers $performance $execution_time >> $csv_output_file
+    fi
+
     printf "Hadoop WorkFlow executed for %s\n" ${filename}
-    
 done
 
 
@@ -110,7 +130,7 @@ if [ "$download_output" = true ]; then
         # local directory for output files
         local_dir=${resource_dir}/output/output_${formatted_number}/${filename}
         mkdir -p $local_dir
-        
+
         # output files
         count_output_file=${local_dir}/count.txt
         > $count_output_file
