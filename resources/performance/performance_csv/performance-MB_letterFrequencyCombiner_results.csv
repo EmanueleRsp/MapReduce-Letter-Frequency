@@ -1,10 +1,4 @@
 Project,NumReducers,Performance,ExecutionTime
-<<<<<<< Updated upstream
-letterFrequencyCombiner,1,true,102
-letterFrequencyCombiner,2,true,97
-letterFrequencyCombiner,3,true,97
-=======
-letterFrequencyCombiner,1,true,97
-letterFrequencyCombiner,2,true,104
-letterFrequencyCombiner,3,true,100
->>>>>>> Stashed changes
+letterFrequencyCombiner,1,true,100
+letterFrequencyCombiner,2,true,103
+letterFrequencyCombiner,3,true,107

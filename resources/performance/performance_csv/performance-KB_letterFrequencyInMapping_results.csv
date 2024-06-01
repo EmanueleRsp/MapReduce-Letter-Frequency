@@ -1,9 +1,4 @@
 Project,NumReducers,Performance,ExecutionTime
-<<<<<<< Updated upstream
-letterFrequencyInMapping,1,true,48
-letterFrequencyInMapping,2,true,48
-=======
-letterFrequencyInMapping,1,true,50
-letterFrequencyInMapping,2,true,50
->>>>>>> Stashed changes
-letterFrequencyInMapping,3,true,48
+letterFrequencyInMapping,1,true,49
+letterFrequencyInMapping,2,true,51
+letterFrequencyInMapping,3,true,52
