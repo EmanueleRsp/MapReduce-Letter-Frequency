@@ -1,0 +1,2 @@
+workflow=letterFrequencyCombiner
+reducers=2

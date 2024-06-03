@@ -5,7 +5,7 @@ import java.util.Map;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -20,10 +20,10 @@ import java.util.regex.Pattern;
 public class LetterFrequency
 {
 
-    public static class FrequencyMapper extends Mapper<Object, Text, Text, IntWritable> 
+    public static class FrequencyMapper extends Mapper<Object, Text, Text, LongWritable> 
     {
         private Text reducerKey = new Text();
-        private final static IntWritable reducerValue = new IntWritable(1);
+        private final static LongWritable reducerValue = new LongWritable(1);
         private final static Pattern CHARACTER_PATTERN = Pattern.compile("[a-z]", Pattern.CASE_INSENSITIVE);
 
         @Override
@@ -42,44 +42,44 @@ public class LetterFrequency
         }
     }
 
-    public static class FrequencyCombiner extends Reducer<Text, IntWritable, Text, IntWritable>
+    public static class FrequencyCombiner extends Reducer<Text, LongWritable, Text, LongWritable>
     {
         @Override
-        public void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException 
+        public void reduce(Text key, Iterable<LongWritable> values, Context context) throws IOException, InterruptedException 
         {
             // Variables
             int sum = 0;
 
             // Iterate over the values
-            for (IntWritable value : values) {
+            for (LongWritable value : values) {
                 sum += value.get();
             }
 
             // Write the output
-            context.write(key, new IntWritable(sum));
+            context.write(key, new LongWritable(sum));
         }
     }
 
-    public static class FrequencyReducer extends Reducer<Text, IntWritable, Text, DoubleWritable>
+    public static class FrequencyReducer extends Reducer<Text, LongWritable, Text, DoubleWritable>
     {
-        private static int TEXT_LENGTH;
+        private static long TEXT_LENGTH;
 
         @Override
         public void setup(Context context)
         {
             // Configuration
             Configuration conf = context.getConfiguration();
-            TEXT_LENGTH = Integer.parseInt(conf.get("textLength"));
+            TEXT_LENGTH = Long.parseLong(conf.get("textLength"));
         }
 
         @Override
-        public void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException 
+        public void reduce(Text key, Iterable<LongWritable> values, Context context) throws IOException, InterruptedException 
         {
             // Variables
             int sum = 0;
 
             // Iterate over the values
-            for (IntWritable value : values) {
+            for (LongWritable value : values) {
                 sum += value.get();
             }
 
@@ -89,11 +89,11 @@ public class LetterFrequency
         }
     }
 
-    public static Job configureJob(Configuration conf, Map<String, String> argMap, int textLength, int numReducerTasks) throws IOException {
+    public static Job configureJob(Configuration conf, Map<String, String> argMap, long textLength, int numReducerTasks) throws IOException {
         Job letterFrequencyJob = Job.getInstance(conf, "LetterFrequency");
     
         // Set the configuration
-        letterFrequencyJob.getConfiguration().setInt("textLength", textLength);
+        letterFrequencyJob.getConfiguration().setLong("textLength", textLength);
     
         // Set the main classes
         letterFrequencyJob.setJarByClass(LetterFrequency.class);
@@ -112,7 +112,7 @@ public class LetterFrequency
     
         // Set the output key and value classes for the mapper
         letterFrequencyJob.setMapOutputKeyClass(Text.class);
-        letterFrequencyJob.setMapOutputValueClass(IntWritable.class);
+        letterFrequencyJob.setMapOutputValueClass(LongWritable.class);
     
         // Set the output key and value classes for the reducer
         letterFrequencyJob.setOutputKeyClass(Text.class);

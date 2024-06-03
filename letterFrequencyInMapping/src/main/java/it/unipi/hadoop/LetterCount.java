@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -23,16 +23,16 @@ import org.apache.hadoop.conf.Configuration;
 
 public class LetterCount
 {
-    public static class CounterMapper extends Mapper<Object, Text, NullWritable, IntWritable> 
+    public static class CounterMapper extends Mapper<Object, Text, NullWritable, LongWritable> 
     {
-        private Map<NullWritable, IntWritable> map;
+        private Map<NullWritable, LongWritable> map;
         private final static Pattern CHARACTER_PATTERN = Pattern.compile("[a-z]", Pattern.CASE_INSENSITIVE);
 
         @Override
         public void setup(Context context)
         {
             // Initialize the map
-            map = new HashMap<NullWritable, IntWritable>();
+            map = new HashMap<NullWritable, LongWritable>();
         }
         
         @Override
@@ -45,9 +45,9 @@ public class LetterCount
                 // Check if the character is a letter
                 if (CHARACTER_PATTERN.matcher(String.valueOf(ch)).matches()) {
                     if (map.containsKey(NullWritable.get())) {
-                        map.put(NullWritable.get(), new IntWritable(map.get(NullWritable.get()).get() + 1));
+                        map.put(NullWritable.get(), new LongWritable(map.get(NullWritable.get()).get() + 1));
                     } else {
-                        map.put(NullWritable.get(), new IntWritable(1));
+                        map.put(NullWritable.get(), new LongWritable(1));
                     }
                 }
             }
@@ -57,32 +57,32 @@ public class LetterCount
         public void cleanup(Context context) throws IOException, InterruptedException
         {
             // Cleanup
-            for (Map.Entry<NullWritable, IntWritable> entry : map.entrySet()){
+            for (Map.Entry<NullWritable, LongWritable> entry : map.entrySet()){
                 context.write(entry.getKey(), entry.getValue());
             }
         }
 
     }
 
-    public static class CounterPartitioner extends Partitioner<NullWritable, IntWritable> {
+    public static class CounterPartitioner extends Partitioner<NullWritable, LongWritable> {
         @Override
-        public int getPartition(NullWritable key, IntWritable value, int numReduceTasks) {
+        public int getPartition(NullWritable key, LongWritable value, int numReduceTasks) {
             return (int)(Math.random() * numReduceTasks);
         }
     }
 
-    public static class CounterReducer extends Reducer<NullWritable, IntWritable, NullWritable, IntWritable>
+    public static class CounterReducer extends Reducer<NullWritable, LongWritable, NullWritable, LongWritable>
     {
         // Variables
         private final static NullWritable reducerKey = NullWritable.get();
-        private IntWritable reducerValue = new IntWritable();
+        private LongWritable reducerValue = new LongWritable();
 
         @Override
-        public void reduce(NullWritable key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException 
+        public void reduce(NullWritable key, Iterable<LongWritable> values, Context context) throws IOException, InterruptedException 
         {
 
             // Iterate over the values
-            for (IntWritable value : values) {
+            for (LongWritable value : values) {
                 reducerValue.set(reducerValue.get() + value.get());
             }
 
@@ -113,11 +113,11 @@ public class LetterCount
 
         // Set the output key and value classes for the mapper
         letterCountJob.setMapOutputKeyClass(NullWritable.class);
-        letterCountJob.setMapOutputValueClass(IntWritable.class);
+        letterCountJob.setMapOutputValueClass(LongWritable.class);
     
         // Set the output key and value classes for the reducer
         letterCountJob.setOutputKeyClass(NullWritable.class);
-        letterCountJob.setOutputValueClass(IntWritable.class);
+        letterCountJob.setOutputValueClass(LongWritable.class);
     
         // Set the input and output paths
         FileInputFormat.addInputPath(letterCountJob, new Path(argMap.get("input")));

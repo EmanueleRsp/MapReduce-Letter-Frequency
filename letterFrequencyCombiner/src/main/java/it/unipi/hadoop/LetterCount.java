@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -21,10 +21,10 @@ import org.apache.hadoop.conf.Configuration;
 
 public class LetterCount
 {
-    public static class CounterMapper extends Mapper<Object, Text, NullWritable, IntWritable> 
+    public static class CounterMapper extends Mapper<Object, Text, NullWritable, LongWritable> 
     {
         private final static NullWritable reducerKey = NullWritable.get();
-        private final static IntWritable reducerValue = new IntWritable(1);
+        private final static LongWritable reducerValue = new LongWritable(1);
         private final static Pattern CHARACTER_PATTERN = Pattern.compile("[a-z]", Pattern.CASE_INSENSITIVE);
 
         @Override
@@ -42,25 +42,25 @@ public class LetterCount
         }
     }
 
-    public static class CounterPartitioner extends Partitioner<NullWritable, IntWritable> {
+    public static class CounterPartitioner extends Partitioner<NullWritable, LongWritable> {
         @Override
-        public int getPartition(NullWritable key, IntWritable value, int numReduceTasks) {
+        public int getPartition(NullWritable key, LongWritable value, int numReduceTasks) {
             return (int)(Math.random() * numReduceTasks);
         }
     }
 
-    public static class CounterReducer extends Reducer<NullWritable, IntWritable, NullWritable, IntWritable>
+    public static class CounterReducer extends Reducer<NullWritable, LongWritable, NullWritable, LongWritable>
     {
         // Variables
         private final static NullWritable reducerKey = NullWritable.get();
-        private IntWritable reducerValue = new IntWritable();
+        private LongWritable reducerValue = new LongWritable();
 
         @Override
-        public void reduce(NullWritable key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException 
+        public void reduce(NullWritable key, Iterable<LongWritable> values, Context context) throws IOException, InterruptedException 
         {
 
             // Iterate over the values
-            for (IntWritable value : values) {
+            for (LongWritable value : values) {
                 reducerValue.set(reducerValue.get() + value.get());
             }
 
@@ -94,11 +94,11 @@ public class LetterCount
     
         // Set the output key and value classes for the mapper
         letterCountJob.setMapOutputKeyClass(NullWritable.class);
-        letterCountJob.setMapOutputValueClass(IntWritable.class);
+        letterCountJob.setMapOutputValueClass(LongWritable.class);
     
         // Set the output key and value classes for the reducer
         letterCountJob.setOutputKeyClass(NullWritable.class);
-        letterCountJob.setOutputValueClass(IntWritable.class);
+        letterCountJob.setOutputValueClass(LongWritable.class);
     
         // Set the input and output paths
         FileInputFormat.addInputPath(letterCountJob, new Path(argMap.get("input")));

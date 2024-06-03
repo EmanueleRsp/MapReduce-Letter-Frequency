@@ -165,4 +165,5 @@ echo $((run_number + 1)) > run_number.txt
 # Add file text to specify parameters used
 cd ${parent_dir}
 filename=$(basename $file .txt)
-echo "Parameters: WorkFlow=${project_name} Num_reducers=$num_reducers" >> ${resource_dir}/output/output_${formatted_number}/parameters.txt
+echo "workflow=${project_name}" >> ${resource_dir}/output/output_${formatted_number}/parameters.txt
+echo "reducers=$num_reducers" >> ${resource_dir}/output/output_${formatted_number}/parameters.txt

@@ -45,13 +45,13 @@ public class WorkFlow {
         return argMap;
     }
 
-    public static int readTextLength(Configuration conf, String outputDirectory) throws IOException {
+    public static long readTextLength(Configuration conf, String outputDirectory) throws IOException {
         // Read the output of the first job
         FileSystem fs = FileSystem.get(conf);
         Path outputDirPath = new org.apache.hadoop.fs.Path(outputDirectory);
 
         // Initialize the total text length
-        int totalTextLength = 0;
+        long totalTextLength = 0;
 
         // Get a list of all files in the output directory
         FileStatus[] status = fs.listStatus(outputDirPath);
@@ -67,7 +67,7 @@ public class WorkFlow {
                 // The result is on the first line of the output
                 String firstLine = bufferedReader.readLine();
                 if(firstLine != null) {
-                    int textLength = Integer.parseInt(firstLine);
+                    long textLength = Long.parseLong(firstLine);
                     totalTextLength += textLength;
                 }
 
@@ -100,7 +100,7 @@ public class WorkFlow {
         }
 
         // Read the text length
-        int textLength = readTextLength(conf, argMap.get("letterCountOutput"));
+        long textLength = readTextLength(conf, argMap.get("letterCountOutput"));
         
         // Create a letter frequency job
         Job letterFrequencyJob = LetterFrequency.configureJob(conf, argMap, textLength, DEFAULT_NUM_REDUCERS);

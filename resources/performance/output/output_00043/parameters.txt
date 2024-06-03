@@ -1,1 +1,0 @@
-Parameters: WorkFlow=letterFrequencyInMapping Num_reducers=1

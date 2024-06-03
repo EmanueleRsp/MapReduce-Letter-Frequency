@@ -1,0 +1,7 @@
+Project,NumReducers,Performance,ExecutionTime
+letterFrequencyCombiner,1,true,1070
+letterFrequencyCombiner,2,true,1201
+letterFrequencyCombiner,3,true,1211
+letterFrequencyCombiner,1,true,1206
+letterFrequencyCombiner,2,true,1158
+letterFrequencyCombiner,3,true,1103
