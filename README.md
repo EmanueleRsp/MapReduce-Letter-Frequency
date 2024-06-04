@@ -1,24 +1,6 @@
 # letter-frequency-hadoop-MapReduce
 
-This project is a simple MapReduce program that calculates the frequency of each letter in a text file. The program is written in Java and uses the Hadoop MapReduce framework.
-
-## Usage
-1. To run the program, you need to have Hadoop installed on your machine. You can download Hadoop from the [official website](https://hadoop.apache.org/).
-
-2. Clone the repository and navigate to the project directory.
-
-3. Upload the input files in `resources/input` directory.
-
-4. Run the script `run.sh` to compile the Java code, create a JAR file, and run the MapReduce workflow.
-
-5. The output will be saved in the `resources/output` directory.
-
-## Input
-The input text file should be uploaded in the `resources/input` directory.
-
-For the input generation, we used [Wikisource](https://it.wikisource.org/wiki/Speciale:Esporta) to download a large number of xml files for a specific category.
-Then, we used `script/xml2txt.ipynb` to convert the xml files to txt files (see [here](script/xml2txt.ipynb) for more details).
-
+This project is a simple MapReduce program that calculates the frequency of each letter in a text file. The program is written in Java and uses the Hadoop MapReduce framework. More details [here](Report.pdf).
 
 ## Workflow
 The program consists of **two jobs**:
