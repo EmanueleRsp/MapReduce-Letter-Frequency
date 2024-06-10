@@ -1,4 +1,4 @@
-# letter-frequency-hadoop-MapReduce
+# Letter Frequency Computing using MapReduce Framework 
 
 This project is a simple MapReduce program that calculates the frequency of each letter in a text file. The program is written in Java and uses the Hadoop MapReduce framework. More details [here](Report.pdf).
 
