@@ -1,7 +1,6 @@
 package it.unipi.hadoop;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -18,21 +17,22 @@ import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
-
 import org.apache.hadoop.conf.Configuration;
 
 public class LetterCount
 {
     public static class CounterMapper extends Mapper<Object, Text, NullWritable, LongWritable> 
     {
-        private Map<NullWritable, LongWritable> map;
+        private NullWritable reducerKey;
+        private LongWritable reducerValue;
         private final static Pattern CHARACTER_PATTERN = Pattern.compile("[a-z]", Pattern.CASE_INSENSITIVE);
 
         @Override
         public void setup(Context context)
         {
-            // Initialize the map
-            map = new HashMap<NullWritable, LongWritable>();
+            // Initialize key and value
+            reducerKey = NullWritable.get();
+            reducerValue = new LongWritable(0);
         }
         
         @Override
@@ -44,11 +44,8 @@ public class LetterCount
             for (char ch : line.toCharArray()) {
                 // Check if the character is a letter
                 if (CHARACTER_PATTERN.matcher(String.valueOf(ch)).matches()) {
-                    if (map.containsKey(NullWritable.get())) {
-                        map.put(NullWritable.get(), new LongWritable(map.get(NullWritable.get()).get() + 1));
-                    } else {
-                        map.put(NullWritable.get(), new LongWritable(1));
-                    }
+                    // Increment the value
+                    reducerValue.set(reducerValue.get() + 1);
                 }
             }
         }
@@ -56,10 +53,8 @@ public class LetterCount
         @Override
         public void cleanup(Context context) throws IOException, InterruptedException
         {
-            // Cleanup
-            for (Map.Entry<NullWritable, LongWritable> entry : map.entrySet()){
-                context.write(entry.getKey(), entry.getValue());
-            }
+            // Emit the final key-value pair
+            context.write(reducerKey, reducerValue);
         }
 
     }
@@ -75,11 +70,13 @@ public class LetterCount
     {
         // Variables
         private final static NullWritable reducerKey = NullWritable.get();
-        private LongWritable reducerValue = new LongWritable();
 
         @Override
         public void reduce(NullWritable key, Iterable<LongWritable> values, Context context) throws IOException, InterruptedException 
         {
+            // Initialize the reducer value
+            LongWritable reducerValue = new LongWritable();
+            reducerValue.set(0);
 
             // Iterate over the values
             for (LongWritable value : values) {
@@ -88,7 +85,6 @@ public class LetterCount
 
             // Write the output
             context.write(reducerKey, reducerValue);
-         
         }
     }
 

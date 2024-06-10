@@ -53,11 +53,13 @@ public class LetterCount
     {
         // Variables
         private final static NullWritable reducerKey = NullWritable.get();
-        private LongWritable reducerValue = new LongWritable();
 
         @Override
         public void reduce(NullWritable key, Iterable<LongWritable> values, Context context) throws IOException, InterruptedException 
         {
+            // Initialize the reducer value
+            LongWritable reducerValue = new LongWritable();
+            reducerValue.set(0);
 
             // Iterate over the values
             for (LongWritable value : values) {

@@ -47,16 +47,17 @@ public class LetterFrequency
         @Override
         public void reduce(Text key, Iterable<LongWritable> values, Context context) throws IOException, InterruptedException 
         {
-            // Variables
-            int sum = 0;
+            // Initialize the reducer value
+            LongWritable reducerValue = new LongWritable();
+            reducerValue.set(0);
 
             // Iterate over the values
             for (LongWritable value : values) {
-                sum += value.get();
+                reducerValue.set( reducerValue.get() + value.get());
             }
 
             // Write the output
-            context.write(key, new LongWritable(sum));
+            context.write(key, reducerValue);
         }
     }
 

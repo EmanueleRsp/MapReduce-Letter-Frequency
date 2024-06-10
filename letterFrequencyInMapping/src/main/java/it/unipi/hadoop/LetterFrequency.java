@@ -38,7 +38,6 @@ public class LetterFrequency
         {   
             // Convert the line to lower case and remove accents
             String line = StringUtils.removeAccents(value.toString()).toLowerCase();
-        
 
             for (char ch : line.toCharArray()) {
                 // Check if the character is a letter
@@ -78,7 +77,7 @@ public class LetterFrequency
         public void reduce(Text key, Iterable<LongWritable> values, Context context) throws IOException, InterruptedException 
         {
             // Variables
-            int sum = 0;
+            long sum = 0;
 
             // Iterate over the values
             for (LongWritable value : values) {
