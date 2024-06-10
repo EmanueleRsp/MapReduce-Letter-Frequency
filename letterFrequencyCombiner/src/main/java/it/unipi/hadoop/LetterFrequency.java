@@ -77,7 +77,7 @@ public class LetterFrequency
         public void reduce(Text key, Iterable<LongWritable> values, Context context) throws IOException, InterruptedException 
         {
             // Variables
-            int sum = 0;
+            long sum = 0;
 
             // Iterate over the values
             for (LongWritable value : values) {
