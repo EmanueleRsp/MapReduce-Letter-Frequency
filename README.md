@@ -2,6 +2,8 @@
 
 This project is a simple MapReduce program that calculates the frequency of each letter in a text file. The program is written in Java and uses the Hadoop MapReduce framework. More details [here](Report.pdf).
 
+For the project presentation, you can take a look [here](Presentation.pdf) :).
+
 ## Workflow
 The program consists of **two jobs**:
 
